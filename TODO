@@ -1,0 +1,6 @@
+- add examples when code complete
+- investigate moving Expanders to PROGMEM
+- investigate switching the Expanders table to "fromPin, toPin" format
+- add more drivers
+- add shiftOutEx() and shiftInEx()
+- move SPI to arbitrated version

@@ -1,0 +1,24 @@
+Arduino Port Expander Library
+
+Written by Radu - Eosif Mihailescu <radu.mihailescu@linux360.ro> 2012-07-18
+
+This library deals with expanding the I/O capabilities of the Arduino using
+external devices such as shift registers, multiplexers and port expanders.
+
+To the furthest extent that this is legally possible, the fork maintained by 
+Radu - Eosif Mihailescu and published here https://github.com/csdexter/Arbitrator
+is hereby released under the LGPL version 3.
+To the furthest extent that this is legally enforceable, the copyright remains
+with the authors listed above.
+
+See the example sketches to learn how to use the library in your code.
+
+NOTES:
+ * Pick the drivers you need (TEC_* classes) and instantiate as many as you
+   need, depending on your topology
+ * Construct the pin table (array of TExpanderEntry) and assign to Expanders.
+ * Call digitalWriteEx(), digitalReadEx() and pinModeEx() just like you would
+   with the non-Ex versions.
+
+For general questions and updates on this library please contact the fork
+maintainer at <radu.mihailescu@linux360.ro>.
