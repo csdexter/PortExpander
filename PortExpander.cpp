@@ -65,6 +65,7 @@ void TEC_SR_74595::begin() {
 
 void TEC_SR_74595::end() {
   if(_pinG != PEC_74595_PIN_G_HW) digitalWriteEx(_pinG, HIGH);
+  if(_useSPI) SPI.end(); //TODO: Use arbitration
 };
 
 void TEC_SR_74595::digitalWrite(word pin, boolean value) {
@@ -74,11 +75,10 @@ void TEC_SR_74595::digitalWrite(word pin, boolean value) {
   pushAndLatch();
 };
 
-//TODO: shiftOut() is not Expander-aware
 void TEC_SR_74595::updateContents() {
   for(byte i = 0; i < _width; i++)
     if(_useSPI) SPI.transfer(_contents[i]); //TODO: use Arbitration
-    else shiftOut(_pinSER, _pinSRCK, LSBFIRST, _contents[i]);
+    else shiftOut(_pinSER, _pinSRCK, LSBFIRST, _contents[i]); //TODO: shiftOut() is not Expander-aware
 };
 
 void TEC_SR_74595::pushAndLatch() {
@@ -86,4 +86,36 @@ void TEC_SR_74595::pushAndLatch() {
   //Dummy delay, the 74595 needs only 20ns here
   delayMicroseconds(1);
   digitalWriteEx(_pinRCK, LOW);
+};
+
+void TEC_SR_74165::begin() {
+  if(!(_useSPI && _pinSHLD == SS)) pinModeEx(_pinSHLD, OUTPUT);
+  if(!_useSPI) {
+    pinModeEx(_pinCLK, OUTPUT);
+    pinModeEx(_pinQH, INPUT);
+  } else SPI.begin(); //TODO: Use arbitration
+};
+
+void TEC_SR_74165::end() {
+  if(_useSPI) SPI.end(); //TODO: Use arbitration
+};
+
+boolean TEC_SR_74165::digitalRead(word pin) {
+  sampleAndLatch();
+  fetchContents();
+  
+  return bitRead(_contents[pin / 8], pin % 8);
+};
+
+void TEC_SR_74165::sampleAndLatch() {
+  digitalWriteEx(_pinSHLD, LOW);
+  //Dummy delay, the 74165 only needs 15ns here
+  delayMicroseconds(1);
+  digitalWriteEx(_pinSHLD, HIGH);
+};
+
+void TEC_SR_74165::fetchContents() {
+  for(byte i = 0; i < _width; i++)
+    if(_useSPI) _contents[i] = SPI.transfer(0x00); //TODO: use Arbitration
+    else _contents[i] = shiftIn(_pinQH, _pinCLK, LSBFIRST); //TODO: shiftIn() is not Expander-aware
 };

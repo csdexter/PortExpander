@@ -30,7 +30,6 @@ void digitalWriteEx(word pin, boolean value);
 boolean digitalReadEx(word pin);
 void pinModeEx(word pin, byte mode);
 
-//Driver interface
 class TExpanderChip {
   public:
     virtual void begin() = 0;
@@ -83,6 +82,39 @@ class TEC_SR_74595: public TExpanderChip {
     
     void updateContents();
     void pushAndLatch();
+};
+
+class TEC_SR_74165: public TExpanderChip {
+  public:
+    TEC_SR_74165(byte pinSHLD = SS, byte pinQH = MISO, byte pinCLK = SCK,
+                 byte width = 1, boolean useSPI = true) {
+      _useSPI = useSPI;
+      _pinSHLD = pinSHLD;
+      _pinQH = pinQH;
+      _pinCLK = pinCLK;
+      _width = width;
+      _contents = (byte *)calloc(_width, sizeof(byte));
+    };
+
+    TEC_SR_74165(byte pinSHLD = SS, byte width = 1) {
+      TEC_SR_74165(pinSHLD, MISO, SCK, width, true);
+    };
+
+    void begin();
+    void end();
+    //We don't do writes
+    void digitalWrite(word pin, boolean value) { return; };
+    boolean digitalRead(word pin);
+    //We are not bidirectional
+    void pinMode(word pin, boolean direction) { return; };
+    
+  private:
+    byte *_contents;
+    byte _width, _pinCLK, _pinSHLD, _pinQH;
+    boolean _useSPI;
+    
+    void sampleAndLatch();
+    void fetchContents();
 };
 
 #endif
