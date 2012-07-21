@@ -4,3 +4,5 @@
 - add more drivers
 - add shiftOutEx() and shiftInEx()
 - move SPI to arbitrated version
+- align everybody with respect to HW/HWH/HWL signalling and sizeOf(pin)
+

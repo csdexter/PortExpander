@@ -46,6 +46,8 @@ typedef struct {
 
 extern TExpanderEntry *PortExpanders;
 
+
+/* 74*595 family. Also works with exotic versions, e.g. TPIC6B595 */
 #define PEC_74595_PIN_SRCLR_HW 0xFF
 #define PEC_74595_PIN_G_HW 0xFF
 
@@ -84,6 +86,7 @@ class TEC_SR_74595: public TExpanderChip {
     void pushAndLatch();
 };
 
+/* 74*165 family */
 class TEC_SR_74165: public TExpanderChip {
   public:
     TEC_SR_74165(byte pinSHLD = SS, byte pinQH = MISO, byte pinCLK = SCK,
@@ -114,6 +117,44 @@ class TEC_SR_74165: public TExpanderChip {
     boolean _useSPI;
     
     void sampleAndLatch();
+    void fetchContents();
+};
+
+/* PCF8575C, PCF8575, PCF8574 */
+#define PEC_PCF8575C_PIN_INT_HW 0xFF
+
+class TEC_PE_PCF8575C: public TExpanderChip {
+  public:
+    /* NOTE: targetAddress is only the A[0..2] bits */
+    TEC_PE_PCF8575C(byte pinINT, byte targetAddress, boolean wide = true) {
+      _pinINT = pinINT;
+      _i2caddr = ((B01000000 | targetAddress << 1) >> 1);
+      _wide = wide;
+      _dialAddress = false;
+      _contents = (byte *)malloc((_wide ? 2 : 1) * sizeof(byte));
+    };
+
+    TEC_PE_PCF8575C(byte pinINT, byte pinA0, byte pinA1, byte pinA2,
+                    byte targetAddress, boolean wide = true) {
+      TEC_PE_PCF8575C(pinINT, targetAddress, wide);
+      _pinA0 = pinA0;
+      _pinA1 = pinA1;
+      _pinA2 = pinA2;
+      _dialAddress = true;
+    };
+
+    void begin();
+    void end() { return; };
+    void digitalWrite(word pin, boolean value);
+    boolean digitalRead(word pin);
+    void pinMode(word pin, boolean direction);
+
+  private:
+    byte *_contents;
+    byte _i2caddr, _pinINT, _pinA0, _pinA1, _pinA2;
+    boolean _wide, _dialAddress;
+
+    void dialAddress();
     void fetchContents();
 };
 
